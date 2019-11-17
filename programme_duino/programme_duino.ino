@@ -11,7 +11,7 @@
 
 
 
-#define MANUEL false //true (vrai) ou false (faux)
+#define MANUEL true //true (vrai) ou false (faux)
 
 //parametre des led
 #define PIN            7 //port pour piloter
@@ -82,7 +82,10 @@ void AVANCER(float x){ //en cm
     Moteur_D->step(1,FORWARD,SINGLE); //en avant
   }
 }
-
+void AVANCER_UN_PAS(){ //en cm
+    Moteur_G->step(1,BACKWARD,SINGLE); //en avant
+    Moteur_D->step(1,FORWARD,SINGLE); //en avant
+}
 void RECULER(float x){ //en cm
   int pas = x/K;
   for(int i=0;i<pas;i++)
@@ -278,6 +281,9 @@ void setup()
   pixy.init();
 
   pixels.begin(); //Pour utiliser les leds
+
+  pinMode(A4,INPUT); // joystick1
+  pinMode(A5,INPUT); // joystick2
   
   
   Carte_Moteur.begin();  //initialise le moteur avec une frequence par défaut 1.6KHz
@@ -293,13 +299,15 @@ void setup()
   }
   else
   {
+      // initialisation interruption Timer 2
+MsTimer2::set(DUREE, InterruptTimer2); // période = duree du match, on activera avec la tirette
+    
     Moteur_G->setSpeed(4000);  // 7560 rpm   
     
     Moteur_D->setSpeed(4000);  // 7560 rpm   
   }
 
-  // initialisation interruption Timer 2
-MsTimer2::set(DUREE, InterruptTimer2); // période = duree du match, on activera avec la tirette
+
 
 pinMode(LED_BUILTIN, OUTPUT); // initialisation de la led interne de l'arduino
 
@@ -317,19 +325,25 @@ pinMode(A1,INPUT_PULLUP); // contacteur arrière droit
 pinMode(A2,INPUT_PULLUP); // contacteur arrière gauche
 
 attrape_atome.attach(9); // pinoche 9 pour le servo attrape_atome
+/*
 attrape_atome.write(100); // angle d'initialisation d'attrape_atome 
 delay(1500);
 attrape_atome.write(ATTRAPE_ATOME_VERTICAL); // angle d'initialisation d'attrape_atome 
+*/
 
 libere_atome.attach(8);
+/*
 libere_atome.write(LIBERE_ATOME_SORTI);
 delay(1500);
 libere_atome.write(LIBERE_ATOME_RANGE);
+*/
 
 pousse_atome.attach(10);
+/*
 pousse_atome.write(POUSSE_ATOME_RANGE);
 delay(1500);
 pousse_atome.write(POUSSE_ATOME_DEPLIE);
+*/
 
 
 allumeur.attach(6);
@@ -384,16 +398,24 @@ void loop() {
   
   if (MANUEL)
   {
-    Serial.println("\n\nChoississez une action:");
+    /*Serial.println("\n\nChoississez une action:");
     Serial.println("\t* 1 : piloter le servo qui attrape les atomes.");
     Serial.println("\t* 2 : piloter le servo qui pousse les atomes.");
     Serial.println("\t* 3 : piloter le servo qui libere les atomes.");
     Serial.println("\t* 4 : piloter le servo qui allume l'expérience.");
     Serial.println("\t* 5 : lire la valeur bouton de couleur.");
     Serial.println("\t* 6 : une tete chercheuse sur le bleu avec 40 secondes de délai.");
+    Serial.println("\t* UP : avancer. ");
+    Serial.println("\t* DOWN : reculer. ");
+    Serial.println("\t* a : avancer. ");
     Serial.flush();
     while (!Serial.available());
-    int choix = Serial.parseInt();
+    char lettre=Serial.read();
+    if(lettre=='a')
+    {
+      AVANCER(10);
+    }*/
+    /*int choix = Serial.parseInt();
 //CHOIX DES ACTIONS
     if((choix >=1)&&(choix<=4))
     {
@@ -427,6 +449,15 @@ void loop() {
     }
     if(choix==6)
       TETE_CHERCHEUSE(40,BLEU);
+      */
+
+   int joystick1=analogRead(A4);
+   int joystick2=analogRead(A5);
+    Serial.println(joystick2);
+  if(joystick2<500)
+  {
+    AVANCER_UN_PAS();
+  }
 
   }
   else
