@@ -394,7 +394,7 @@ void loop() {
     Serial.flush();
     while (!Serial.available());
     int choix = Serial.parseInt();
-
+//CHOIX DES ACTIONS
     if((choix >=1)&&(choix<=4))
     {
       Serial.print("\nDonnez la valeur de la position du servo n°");
