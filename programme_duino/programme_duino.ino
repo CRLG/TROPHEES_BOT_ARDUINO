@@ -11,7 +11,7 @@
 
 
 
-#define REGLAGE false //true (vrai) ou false (faux)
+#define MANUEL false //true (vrai) ou false (faux)
 
 //parametre des led
 #define PIN            7 //port pour piloter
@@ -284,11 +284,12 @@ void setup()
   //Carte_Moteur.begin(1000);  //ou avec une fréquence différente 1KHz
 
     
-  if (REGLAGE)
+  if (MANUEL)
   {
     Moteur_G->setSpeed(2000);  // 7560 rpm   
     
     Moteur_D->setSpeed(2000);  // 7560 rpm      
+  //vitesse obligatoire pour eviter blocage pc
   }
   else
   {
@@ -338,7 +339,7 @@ allumeur.write(ALLUMEUR_RANGE);
 
 
 // initialize serial communication at 9600 bits per second:
-if(REGLAGE)
+if(MANUEL)
 {
 Serial.begin(9600);
 Serial.setTimeout(1000);
@@ -350,6 +351,11 @@ Serial.setTimeout(1000);
 void loop() {
 
        int valeur_bouton=analogRead(A0);
+
+       
+       //---------------------------------------------
+       //CHOIX COULEUR
+       //---------------------------------------------
       if(valeur_bouton<800) //bouton vers le haut
       {
         couleur_equipe=VIOLET;
@@ -376,7 +382,7 @@ void loop() {
         }
       }
   
-  if (REGLAGE)
+  if (MANUEL)
   {
     Serial.println("\n\nChoississez une action:");
     Serial.println("\t* 1 : piloter le servo qui attrape les atomes.");
