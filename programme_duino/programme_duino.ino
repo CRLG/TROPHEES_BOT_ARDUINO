@@ -1,3 +1,5 @@
+#include <SoftwareSerial.h>
+#include "messagerieTB.h"
 #include <Wire.h>
 //#include <Pixy2.h>
 #include <Adafruit_MotorShield.h> // inclusion de la librairie pour commander un motor shield
@@ -43,10 +45,15 @@
 #define BLEU 2
 #define VERT 3
 
+#define RX 11
+#define TX 10
 
 //----------------------------------------------------------------------------------------------
 // CREATION VARIABLE, MOTEUR, CAMERA, LEDS
 //----------------------------------------------------------------------------------------------
+
+SoftwareSerial liaisonSerie(RX, TX); //on informe le microcontrôleur que l'on utilise ses broches RX et TX pour une connexion série
+byte DonneeLue; //variable pour stocker les données lues sur la liaison série
 
 // Creation caméra 
 //Pixy2 pixy;
@@ -232,14 +239,12 @@ void InterruptTimer2()
 //----------------------------------------------------------------------------------------------
 void setup()
 {
+  
   //initialisation de la caméra
   //pixy.init();
 
   //initialisation du bandeau de leds
   //pixels.begin(); //Pour utiliser les leds
-
-  pinMode(A4,INPUT); // joystick1
-  pinMode(A5,INPUT); // joystick2
   
   //initialisation de la carte moteur
   Carte_Moteur.begin();  //initialise le moteur avec une frequence par défaut 1.6KHz
@@ -247,8 +252,8 @@ void setup()
   //initialisation des vitesses des moteurs selon le mode (MANUEL ou AUTONOME)
   if (MANUEL)
   {
-    Moteur_G->setSpeed(2000);    
-    Moteur_D->setSpeed(2000);      
+    Moteur_G->setSpeed(4000);    
+    Moteur_D->setSpeed(4000);      
   //vitesse obligatoire pour eviter blocage pc
   }
   else
@@ -287,7 +292,7 @@ delay(1500);
 libere_atome.write(LIBERE_ATOME_RANGE);
 */
 
-pousse_atome.attach(10); // pinoche 10 pour le servo pousse_atome
+//pousse_atome.attach(10); // pinoche 10 pour le servo pousse_atome
 /*
 pousse_atome.write(POUSSE_ATOME_RANGE);
 delay(1500);
@@ -306,8 +311,9 @@ allumeur.write(ALLUMEUR_RANGE);
 // initialise la communication série à une vitesse de 9600 bits par seconde:
 if(MANUEL)
 {
+    //on ouvre la communication série de la télécommande
+  liaisonSerie.begin(9600);
 Serial.begin(9600);
-Serial.setTimeout(1000);
 }
 }
 
@@ -364,13 +370,22 @@ void loop() {
 //----------------------------------------------------------------------------------------------
   {
 
-      int joystick1=analogRead(A4);
-      int joystick2=analogRead(A5);
-      
-      if(joystick2<500)
+    bool message_en_cours=false;
+    while (liaisonSerie.available())
+    {
+      delay(10);
+      byte b = liaisonSerie.read();
+     
+      switch(b)
       {
-        AVANCER(10);
+        case MESSAGE_JAUNE: AVANCER(10);Serial.println("AVANCER");break;
+        case MESSAGE_VERT: RECULER(10);Serial.println("RECULER");break;
+        case MESSAGE_BLEU: TOURNER_GAUCHE();Serial.println("GAUCHE");break;
+        case MESSAGE_ROUGE: TOURNER_DROITE();Serial.println("DROITE");break;
+        default: break;
       }
+      delay(500);
+    }
     
   }
   else

@@ -1,0 +1,9 @@
+
+//messagerie
+#define MESSAGE_JAUNE 1
+#define MESSAGE_BLEU 2
+#define MESSAGE_ROUGE 3
+#define MESSAGE_VERT 4
+#define MESSAGE_CLICK 5
+#define MESSAGE_AVANT_ARRIERE 6
+#define MESSAGE_GAUCHE_DROITE 7
