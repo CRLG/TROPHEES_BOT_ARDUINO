@@ -1,9 +1,14 @@
-
 //messagerie
-#define MESSAGE_JAUNE 1
-#define MESSAGE_BLEU 2
-#define MESSAGE_ROUGE 3
-#define MESSAGE_VERT 4
-#define MESSAGE_CLICK 5
-#define MESSAGE_AVANT_ARRIERE 6
-#define MESSAGE_GAUCHE_DROITE 7
+#define MESSAGE_JAUNE 'a'
+#define MESSAGE_BLEU 'b'
+#define MESSAGE_ROUGE 'c'
+#define MESSAGE_VERT 'd'
+#define MESSAGE_CLICK 'e'
+#define MESSAGE_AVANT_LENT 'f'
+#define MESSAGE_AVANT_RAPIDE 'g'
+#define MESSAGE_ARRIERE_LENT 'h'
+#define MESSAGE_ARRIERE_RAPIDE 'i'
+#define MESSAGE_GAUCHE_LENT 'j'
+#define MESSAGE_GAUCHE_RAPIDE 'k'
+#define MESSAGE_DROITE_LENT 'l'
+#define MESSAGE_DROITE_RAPIDE 'm'

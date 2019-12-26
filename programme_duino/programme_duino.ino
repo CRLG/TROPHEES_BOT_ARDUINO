@@ -1,91 +1,167 @@
 #include <SoftwareSerial.h>
 #include "messagerieTB.h"
 #include <Wire.h>
-//#include <Pixy2.h>
+#include <Pixy2.h>
 #include <Adafruit_MotorShield.h> // inclusion de la librairie pour commander un motor shield
 #include <MsTimer2.h> // inclusion de la librairie pour le timer de la duree du match
-
 #include <Servo.h> // inclusion de la librairie pour commander ses servomoteurs
-//#include <Adafruit_NeoPixel.h> //librairie pour les led
+#include <Adafruit_NeoPixel.h> //librairie pour les led
 #ifdef __AVR__
   #include <avr/power.h>
 #endif
 
+//CONFIGURATION DU ROBOT
+//pour mettre en mode autonome (cad sans télécommande) true (vrai) ou false (faux)
+#define AUTONOME true
+//pour debuguer le programme, mettre à true
+#define DEBUG false
+//à décommenter pour utiliser le bandeau de LEDS
+//#define UTILISE_LEDS true
+//à décommenter pour utiliser la camera
+//#define UTILISE_CAMERA true
 
 
-#define MANUEL true //true (vrai) ou false (faux)
+//ports utilisés
+/**
+ * POUR INFO en utilisant le motor shield v2:
+ * la masse (GND) ainsi que le 5v (par defaut) ou le 3.3v sont nécessaire pour faire fonctionner le shield. (le 5v ou le 3v peuvent être choisis par un jumper sur la carte)
+ * Le shield utilise le signal SDA et SCL pour le protocole i2c utilisé pour contrôler les moteurs. Sur l'arduino UNO ce sont les pinoches analogiques A4 et A5.
+ * Sur l'arduino Mega ces pinoches sont plutôt les pinoches numériques 20 et 21.
+ * Il ne faut donc pas utiliser ces pinoches sur ces arduinos avec ce shield pour quoique ce soit d'autre que des capteurs ou actionneurs i2c.
+ *
+ * Etant donné que le shield utilise l'i2c pour communiquer, vous pouvez connecter d'autres capteurs ou actionneurs i2c sur les signaux SDA et SCL tant qu'ils n'utilisent pas l'adresse 0x60
+ * (l'adresse par défaut du shield) ou l'adresse 0x070 (l'adresse utilisable par le shield pour contrôler un groupe de shield)
+ *
+ * Si vous voulez utiliser les broches ddu shield déddiées aux servos, elles sont reliées aux pinoches 9 et 10.
+ * Si vous n'utilisez pas ces broches, les pinoches 9 et 10 sont libres d'utilisation.
+ * Vous pouvez utiliser toutes les autres pinoches non mentionnées ci-dessus.
+ */
+#define PIN_COULEUR_EQUIPE  A0 //mode autonome
+#define PIN_CONTACTEUR_AR_D A1
+#define PIN_CONTACTEUR_AR_G A2
+//pas encore utilisé        A3
+//motor shield SDA          A4
+//motor shield SCL          A5
+//pas encore utilisé        0
+//pas encore utilisé        1
+//pas encore utilisé        2
+#define PIN_RX              3 //mode téléguidé
+#define PIN_TX              4 //mode téléguidé
+#define PIN_TIRETTE         5 //mode autonome
+#define PIN_LEDS            6 //mode autonome
+#define PIN_SERVO_01        7
+#define PIN_SERVO_02        8
+#define PIN_SERVO_03        9
+#define PIN_SERVO_04        10
+#define PIN_SERVO_05        11
+#define PIN_SERVO_06        12
+//pas encore utilisé        13
 
-//parametre des led
-#define PIN            7 //port pour piloter
-#define NUMPIXELS      3 //nombre de led
+//parametrage du match
+#define DUREE_MATCH               100000 //en millisecondes
+#define DISTANCE_PAR_PAS_MOTEUR   0.1099 //1 pas = K cm
+#define EQUIPE_JAUNE              0
+#define EQUIPE_BLEUE              1
 
-//reglages pour tete chercheuse
-#define PETITE_VITESSE 3000
-#define GRANDE_VITESSE 4500
-#define X_MILIEU 157
-#define X_ECART 15
-#define ANGLE_MAX 35 //angle maximum avant de considérer que la tete chercheuse a merdé
+//parametrage optionnel
+#define LENTE                     2000
+#define RAPIDE                    4000
+#define NBRE_DE_LEDS              3 //nombre de led
 
-#define K 0.1099 //1 pas = K cm
-#define DUREE 100000
-#define TIRETTE 5
-#define ORANGE 0
-#define VIOLET 1
-#define ATTRAPE_ATOME_VERTICAL 150
-#define ATTRAPE_ATOME_HORIZONTAL 77
-#define LIBERE_ATOME_RANGE 1
-#define LIBERE_ATOME_SORTI 95
-#define POUSSE_ATOME_RANGE 150
-#define POUSSE_ATOME_DEPLIE 5
-#define ALLUMEUR_SORTI 165
-#define ALLUMEUR_RANGE 90
-#define ALLUMEUR_TEST 45
-
-#define ROUGE 1
-#define BLEU 2
-#define VERT 3
-
-#define RX 11
-#define TX 10
+//valeurs des servo_moteurs
+#define SERVO_01_INIT 50
+#define SERVO_01_TEST 90
+#define SERVO_02_INIT 50
+#define SERVO_02_TEST 90
+#define SERVO_03_INIT 50
+#define SERVO_03_TEST 90
+#define SERVO_04_INIT 50
+#define SERVO_04_TEST 90
+#define SERVO_05_INIT 50
+#define SERVO_05_TEST 90
+#define SERVO_06_INIT 50
+#define SERVO_06_TEST 90
 
 //----------------------------------------------------------------------------------------------
 // CREATION VARIABLE, MOTEUR, CAMERA, LEDS
 //----------------------------------------------------------------------------------------------
-
-SoftwareSerial liaisonSerie(RX, TX); //on informe le microcontrôleur que l'on utilise ses broches RX et TX pour une connexion série
-byte DonneeLue; //variable pour stocker les données lues sur la liaison série
-
-// Creation caméra 
-//Pixy2 pixy;
+//on informe le microcontrôleur que l'on utilise ses broches RX et TX pour une connexion série
+SoftwareSerial liaisonSerie(PIN_RX, PIN_TX);
 
 //Création variables globales
 bool bProgrammeDemarre; // variable qui indique si le programme est demarre (demarre==true)
 int couleur_equipe;
-Servo attrape_atome;
-Servo libere_atome;
-Servo pousse_atome;
-Servo allumeur;
+
+//Création des servos
+Servo servo_01;
+Servo servo_02;
+Servo servo_03;
+Servo servo_04;
+Servo servo_05;
+Servo servo_06;
 
 //Création des 2 moteurs
 // Création d'une carte moteur avec l'adresse I2C par défaut
 Adafruit_MotorShield Carte_Moteur = Adafruit_MotorShield();
-// Connection d'un moteur de 200 par tour (1.8 degrés)
+// Connection d'un moteur de 200 pas par tour (1.8 degrés)
 // moteur_G #1 (M1 and M2)
 // moteur_D #2 (M3 and M4)
 Adafruit_StepperMotor *Moteur_G = Carte_Moteur.getStepper(200, 1);
 Adafruit_StepperMotor *Moteur_D = Carte_Moteur.getStepper(200, 2);
 
 //création des leds
-//Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
-int delayval = 500; // delais pour les leds
+#ifdef UTILISE_LEDS
+  Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NBRE_DE_LEDS, PIN_LEDS, NEO_GRB + NEO_KHZ800);
+  int delayval = 500; // delais pour les leds
+
+  //couleurs possibles de leds
+  #define LEDS_BLEU 1
+  #define LEDS_ORANGE
+
+  /*
+   * FONCTION METTRE_LEDS_A
+   * mets toutes les leds à une certaine couleur
+   */
+  void METTRE_LEDS_A(int couleur)
+  {
+      for(int i=0;i<NUMPIXELS;i++)
+      {
+        switch(couleur)
+        {
+          case LEDS_BLEU : pixels.setPixelColor(i, pixels.Color(75,0,75)); break;
+          case LEDS_ORANGE : pixels.setPixelColor(i, pixels.Color(255,50,0)); break;
+          default:    pixels.setPixelColor(i, pixels.Color(75,0,75)); break; // réglage en bleu par defaut
+        }
+        pixels.show(); //ça applique la couleur programmée
+        delay(delayval); //on attend "delayval" milliseconds
+      }
+  }
+#endif
+
+//création caméra
+#ifdef UTILISE_CAMERA
+  Pixy2 pixy;
+#endif
+
+/*
+ * FONCTION VITESSE
+ * positionne la vitesse des moteurs
+ * Demande une valeur qui est la vitesse de rotation en tours par minute
+ */
+void VITESSE(int valeur_vitesse)
+{
+    Moteur_G->setSpeed(valeur_vitesse);   
+    Moteur_D->setSpeed(valeur_vitesse); 
+}
 
 /*
  * FONCTION AVANCER
  * Fait avancer le robot d'une certaine distance.
  * Demande une valeur qui est la distance à faire en cm
  */
-void AVANCER(float x){ //en cm
-  int pas = x/K;
+void AVANCER(float x)
+{
+  int pas = x/DISTANCE_PAR_PAS_MOTEUR;
   for(int i=0;i<pas;i++)
   {
     Moteur_G->step(1,BACKWARD,SINGLE); //en avant
@@ -97,7 +173,8 @@ void AVANCER(float x){ //en cm
  * FONCTION AVANCER_UN_PAS
  * Fait touner le moteur droit et gauche d'un pas 
  */
-void AVANCER_UN_PAS(){ //en cm
+void AVANCER_UN_PAS()
+{
     Moteur_G->step(1,BACKWARD,SINGLE); //en avant
     Moteur_D->step(1,FORWARD,SINGLE); //en avant
 }
@@ -107,8 +184,9 @@ void AVANCER_UN_PAS(){ //en cm
  * Fait reculer le robot d'une certaine distance.
  * Demande une valeur qui est la distance à faire en cm
  */
-void RECULER(float x){ //en cm
-  int pas = x/K;
+void RECULER(float x)
+{ 
+  int pas = x/DISTANCE_PAR_PAS_MOTEUR;
   for(int i=0;i<pas;i++)
   {
     Moteur_G->step(1,FORWARD,SINGLE); //en arriere
@@ -116,28 +194,32 @@ void RECULER(float x){ //en cm
   }
 }
 
-
+/*
+ * FONCTION RECULER_UN_PAS
+ * Fait touner le moteur droit et gauche d'un pas 
+ */
+void RECULER_UN_PAS(){ 
+    Moteur_G->step(1,FORWARD,SINGLE); //en arriere
+    Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
+}
 
 /*
  * FONCTION RECALAGE
  * Fait un recalage contre la bordure
  */
 void RECALAGE(int time_out){
-  int contacteur_AD =analogRead(A1);
-  int contacteur_AG=analogRead(A2);
+  int contacteur_AD =analogRead(PIN_CONTACTEUR_AR_D);
+  int contacteur_AG=analogRead(PIN_CONTACTEUR_AR_G);
   unsigned long temps_init=millis();
-  //unsigned long temps_init2=millis();
   unsigned long tempo=0;
-  //unsigned long tempo2=0;
   do
   {
     Moteur_G->step(1,FORWARD,SINGLE); //en arriere
     Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
     tempo=millis()-temps_init; 
-
-    contacteur_AD =analogRead(A1);
-   contacteur_AG=analogRead(A2);
-   
+    
+    contacteur_AD =analogRead(PIN_CONTACTEUR_AR_D);
+    contacteur_AG=analogRead(PIN_CONTACTEUR_AR_G);
   }
   while(((contacteur_AD>800)||(contacteur_AG>800))&&(tempo<(time_out*1000)));
   temps_init=millis();
@@ -184,18 +266,18 @@ void TOURNER_GAUCHE(void){
 void TOURNER_DE(int pas){
   if(pas>0)
   {
-     for(int i=0;i<pas;i++)
+    for(int i=0;i<pas;i++)
     {
-      Moteur_G->step(1,FORWARD,SINGLE); //en arriere
-      Moteur_D->step(1,FORWARD,SINGLE); //en avant
+      Moteur_G->step(1,BACKWARD,SINGLE); //en avant
+      Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
     }
   }
   if(pas<0)
   {
     for(int i=0;i<(pas*(-1));i++)
     {
-      Moteur_G->step(1,BACKWARD,SINGLE); //en avant
-      Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
+      Moteur_G->step(1,FORWARD,SINGLE); //en arriere
+      Moteur_D->step(1,FORWARD,SINGLE); //en avant
     }
   }
 }
@@ -205,28 +287,60 @@ void TOURNER_DE(int pas){
  * fonction appelée au bout de 100 secondes, fin du
  * match en mode autonome
  */
-void InterruptTimer2() 
-{ // debut de la fonction d'interruption Timer2
-
+void FinDeMatch() 
+{
   digitalWrite(LED_BUILTIN, LOW);    // led eteinte
 
   //comme un chenillard à la fin du programme, il ne fait rien d'autre
   while(1)
   {
-    /*for(int i=0;i<NUMPIXELS;i++)
+#ifdef UTILISE_LEDS
+    for(int i=0;i<NUMPIXELS;i++)
     {
-    pixels.setPixelColor(i, pixels.Color(0,150,0)); // vert
-    pixels.show(); // ça applique la couleur programmée
-    delay(delayval); // Delay for a period of time (in milliseconds).
+      pixels.setPixelColor(i, pixels.Color(0,150,0)); //leds en vert
+      pixels.show(); //ça applique la couleur programmée
+      delay(delayval); //on attend pendant "delayval" millisecondes avant d'allumer la prochaine led
     }
     for(int i=0;i<NUMPIXELS;i++)
     {
-    pixels.setPixelColor(i, pixels.Color(0,0,0)); // led éteinte
+      pixels.setPixelColor(i, pixels.Color(0,0,0)); //on éteint toutes les leds
     }
-    pixels.show(); // ça applique la couleur programmée
-    delay(delayval); // Delay for a period of time (in milliseconds).*/
+    pixels.show(); //ça applique la couleur programmée
+    delay(delayval); //on attend pendant "delayval" millisecondes avant de recommencer le chenillard
+#endif
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -239,83 +353,113 @@ void InterruptTimer2()
 //----------------------------------------------------------------------------------------------
 void setup()
 {
-  
-  //initialisation de la caméra
-  //pixy.init();
+  if(DEBUG)
+  {
+    Serial.begin(9600);
+  }
 
+#ifdef UTILISE_CAMERA
+  //initialisation de la caméra
+  pixy.init();
+#endif
+
+#ifdef UTILISE_LEDS
   //initialisation du bandeau de leds
   //pixels.begin(); //Pour utiliser les leds
+#endif
   
   //initialisation de la carte moteur
   Carte_Moteur.begin();  //initialise le moteur avec une frequence par défaut 1.6KHz
 
-  //initialisation des vitesses des moteurs selon le mode (MANUEL ou AUTONOME)
-  if (MANUEL)
+  //initialisation des vitesses des moteurs selon le mode (AUTONOME ou TELEGUIDE)
+  if (AUTONOME)
   {
-    Moteur_G->setSpeed(4000);    
-    Moteur_D->setSpeed(4000);      
-  //vitesse obligatoire pour eviter blocage pc
+    //vitesse max
+    Moteur_G->setSpeed(4000);   
+    Moteur_D->setSpeed(4000); 
+    // initialisation du chronométrage du match
+    MsTimer2::set(DUREE_MATCH, FinDeMatch); // période = duree du match, on activera avec la tirette
+    //initialisation de la tirette      
+    pinMode(PIN_TIRETTE, INPUT);  //en entrée
+    pinMode(PIN_COULEUR_EQUIPE,INPUT_PULLUP); // choix de la couleur
+    couleur_equipe=EQUIPE_BLEUE; //equipe violette par defaut
+    bProgrammeDemarre=false; // le programme n'est pas demarre quand l'arduino s'allume
   }
   else
   {
-    Moteur_G->setSpeed(4000);   
-    Moteur_D->setSpeed(4000);   
-  }
-
-  // initialisation du chronométrage du match
-  MsTimer2::set(DUREE, InterruptTimer2); // période = duree du match, on activera avec la tirette
-
-pinMode(LED_BUILTIN, OUTPUT); // initialisation de la led interne de l'arduino
-digitalWrite(LED_BUILTIN, LOW);    // led eteinte
-
-pinMode(TIRETTE, INPUT);  //en entrée
-
-pinMode(A0,INPUT_PULLUP); // choix de la couleur
-couleur_equipe=VIOLET; //equipe violette par defaut
-
-bProgrammeDemarre=false; // le programme n'est pas demarre quand l'arduino s'allume
-
-pinMode(A1,INPUT_PULLUP); // contacteur arrière droit
-pinMode(A2,INPUT_PULLUP); // contacteur arrière gauche
-
-attrape_atome.attach(9); // pinoche 9 pour le servo attrape_atome
-/*
-attrape_atome.write(100); // angle d'initialisation d'attrape_atome 
-delay(1500);
-attrape_atome.write(ATTRAPE_ATOME_VERTICAL); // angle d'initialisation d'attrape_atome 
-*/
-
-libere_atome.attach(8); // pinoche 8 pour le servo libere_atome
-/*
-libere_atome.write(LIBERE_ATOME_SORTI);
-delay(1500);
-libere_atome.write(LIBERE_ATOME_RANGE);
-*/
-
-//pousse_atome.attach(10); // pinoche 10 pour le servo pousse_atome
-/*
-pousse_atome.write(POUSSE_ATOME_RANGE);
-delay(1500);
-pousse_atome.write(POUSSE_ATOME_DEPLIE);
-*/
-
-// pinoche 6 pour le servo allumeur
-allumeur.attach(6);
-/*
-allumeur.write(ALLUMEUR_TEST);
-delay(1500);
-allumeur.write(ALLUMEUR_RANGE);
-*/
-
-
-// initialise la communication série à une vitesse de 9600 bits par seconde:
-if(MANUEL)
-{
     //on ouvre la communication série de la télécommande
-  liaisonSerie.begin(9600);
-Serial.begin(9600);
+    liaisonSerie.begin(9600);
+    //vitesse obligatoire pour eviter blocage pc
+    Moteur_G->setSpeed(2000);    
+    Moteur_D->setSpeed(2000);      
+  }
+  
+  
+  pinMode(LED_BUILTIN, OUTPUT); // initialisation de la led interne de l'arduino
+  digitalWrite(LED_BUILTIN, LOW);    // led eteinte
+  
+  pinMode(PIN_CONTACTEUR_AR_D,INPUT_PULLUP); // contacteur arrière droit
+  pinMode(PIN_CONTACTEUR_AR_G,INPUT_PULLUP); // contacteur arrière gauche
+  
+  servo_01.attach(PIN_SERVO_01);
+  /*
+  servo_01.write(SERVO_01_TEST); 
+  delay(1500);
+  servo_01.write(SERVO_01_INIT); 
+  */
+  
+  servo_02.attach(PIN_SERVO_02);
+  /*
+  servo_02.write(SERVO_02_TEST); 
+  delay(1500);
+  servo_02.write(SERVO_02_INIT); 
+  */
+
+  servo_03.attach(PIN_SERVO_03);
+  /*
+  servo_03.write(SERVO_03_TEST); 
+  delay(1500);
+  servo_03.write(SERVO_03_INIT); 
+  */
+
+  servo_04.attach(PIN_SERVO_04);
+  /*
+  servo_04.write(SERVO_04_TEST); 
+  delay(1500);
+  servo_04.write(SERVO_04_INIT); 
+  */
+  
+  servo_05.attach(PIN_SERVO_05);
+  /*
+  servo_05.write(SERVO_05_TEST); 
+  delay(1500);
+  servo_05.write(SERVO_05_INIT); 
+  */
+
+  servo_06.attach(PIN_SERVO_06);
+  /*
+  servo_06.write(SERVO_06_TEST); 
+  delay(1500);
+  servo_06.write(SERVO_06_INIT); 
+  */
 }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -333,111 +477,154 @@ Serial.begin(9600);
 
 
 //----------------------------------------------------------------------------------------------
-// LOOP
+// BOUCLE INFINIE
 //----------------------------------------------------------------------------------------------
 void loop() {
-/*
-       //---------------------------------------------
-       //CHOIX COULEUR
-       //---------------------------------------------
-      int valeur_bouton=analogRead(A0);     
-      if(valeur_bouton<800) //bouton vers le haut
-      {
-        couleur_equipe=VIOLET;
-        for(int i=0;i<NUMPIXELS;i++)
-        {
-        pixels.setPixelColor(i, pixels.Color(75,0,75)); // réglage en bleu assez faible
-        pixels.show(); // ça applique la couleur programmée
-        delay(delayval); // Delay for a period of time (in milliseconds).
-        }
-      }
-      else
-      {
-        couleur_equipe=ORANGE;
-        for(int i=0;i<NUMPIXELS;i++)
-        {
-        pixels.setPixelColor(i, pixels.Color(255,50,0)); // Moderately bright green color.
-        pixels.show(); // This sends the updated pixel color to the hardware.
-        delay(delayval); // Delay for a period of time (in milliseconds).
-        }
-      }
- */ 
-
  
-  if (MANUEL)
+  if (!AUTONOME)
 //----------------------------------------------------------------------------------------------
-// MODE MANUEL
+// MODE TELEGUIDE
 //----------------------------------------------------------------------------------------------
   {
-
-    bool message_en_cours=false;
     while (liaisonSerie.available())
     {
       delay(10);
-      byte b = liaisonSerie.read();
+      char b = liaisonSerie.read();
      
-      switch(b)
+      if(b==MESSAGE_JAUNE)
       {
-        case MESSAGE_JAUNE: AVANCER(10);Serial.println("AVANCER");break;
-        case MESSAGE_VERT: RECULER(10);Serial.println("RECULER");break;
-        case MESSAGE_BLEU: TOURNER_GAUCHE();Serial.println("GAUCHE");break;
-        case MESSAGE_ROUGE: TOURNER_DROITE();Serial.println("DROITE");break;
-        default: break;
+        if(DEBUG) Serial.println("JAUNE");
       }
-      delay(500);
-    }
-    
+      if(b==MESSAGE_VERT)
+      {
+        if(DEBUG) Serial.println("VERT");
+      }
+      if(b==MESSAGE_BLEU)
+      {
+        if(DEBUG) Serial.println("BLEU");
+      }
+      if(b==MESSAGE_ROUGE)
+      {
+        if(DEBUG) Serial.println("ROUGE");
+      }
+      if(b==MESSAGE_CLICK)
+      {
+        if(DEBUG) Serial.println("CLICK");
+      }
+      //actions de joystick
+      if(b==MESSAGE_GAUCHE_RAPIDE)
+      {
+        if(DEBUG) Serial.println("GAUCHE");
+        VITESSE(RAPIDE);
+        TOURNER_DE(-1);
+      }
+      if(b==MESSAGE_GAUCHE_LENT)
+      {
+        VITESSE(LENTE);
+        TOURNER_DE(-1);
+      }
+      if(b==MESSAGE_DROITE_LENT)
+      {
+        VITESSE(LENTE);
+        TOURNER_DE(1);  
+      }
+      if(b==MESSAGE_DROITE_RAPIDE)
+      {
+        if(DEBUG) Serial.println("DROITE");
+        VITESSE(RAPIDE);
+        TOURNER_DE(1);
+      }
+
+      if(b==MESSAGE_ARRIERE_RAPIDE)
+      {
+        if(DEBUG) Serial.println("ARRIERE");
+        VITESSE(RAPIDE);
+        RECULER_UN_PAS();
+      }
+      if(b==MESSAGE_ARRIERE_LENT)
+      {
+        VITESSE(LENTE);
+        RECULER_UN_PAS();
+      }
+      if(b==MESSAGE_AVANT_LENT)
+      {
+        VITESSE(LENTE);
+        AVANCER_UN_PAS();  
+      }
+      if(b==MESSAGE_AVANT_RAPIDE)
+      {
+        if(DEBUG) Serial.println("AVANT");
+        VITESSE(RAPIDE);
+        AVANCER_UN_PAS();
+      }
+    } 
   }
   else
 //----------------------------------------------------------------------------------------------
 // MODE AUTONOME
 //----------------------------------------------------------------------------------------------  
   {
-  
-    if ((digitalRead(TIRETTE)==LOW)&&(bProgrammeDemarre==false))
+     //---------------------------------------------
+     //CHOIX COULEUR
+     //---------------------------------------------
+    int valeur_bouton=analogRead(PIN_COULEUR_EQUIPE);     
+    if(valeur_bouton<800) //bouton vers le haut
+    {
+      couleur_equipe=EQUIPE_BLEUE;
+#ifdef UTILSE_LEDS
+      METTRE_LEDS_A(LEDS_BLEU);
+#endif
+    }
+    else
+    {
+      couleur_equipe=EQUIPE_JAUNE;
+#ifdef UTILSE_LEDS
+      METTRE_LEDS_A(LEDS_ORANGE);
+#endif
+    }
+
+     //---------------------------------------------
+     //LANCEMENT PROGRAMME
+     //---------------------------------------------
+    if ((digitalRead(PIN_TIRETTE)==LOW)&&(bProgrammeDemarre==false))
     {
       bProgrammeDemarre=true; // le programme est demarre
 
-      int valeur=analogRead(A0);
+      //on vérifie la couleur de l'équipe avant de lancer le programme (pour être sûr)
+      int valeur=analogRead(PIN_COULEUR_EQUIPE);
       if(valeur<800) //bouton vers le haut
-        couleur_equipe=VIOLET;
+        couleur_equipe=EQUIPE_BLEUE;
       else
-        couleur_equipe=ORANGE;
-      
+        couleur_equipe=EQUIPE_JAUNE;
+
+      //on lance le chrono du match
       MsTimer2::start(); // active Timer2
-      
+
+      //on allume la LED interne de l'arduino indiquant qu'on a enlevé le tirette
       digitalWrite(LED_BUILTIN, HIGH); // led allumee
 
-      if (couleur_equipe==VIOLET)
+      //selon la couleur de l'équipe on déroule un programme
+      if (couleur_equipe==EQUIPE_BLEUE)
       {
-      
-      //Séquence de recalage avant le bouton
-      RECALAGE(15);
-      AVANCER(20);
-      TOURNER_DROITE();
-      RECALAGE(15);
-      AVANCER(27);
-      TOURNER_DE(120);
-      RECALAGE(15);
-      AVANCER(20);          
-     
-
+        RECALAGE(15);
+        AVANCER(20);
+        TOURNER_DROITE();
+        RECALAGE(15);
+        AVANCER(27);
+        TOURNER_DE(120);
+        RECALAGE(15);
+        AVANCER(20);          
       }
       else
       {
-
-      RECALAGE(15);//RECULER(50);
-      AVANCER(20);
-      //TOURNER_GAUCHE();
-      TOURNER_DE(110);
-      RECALAGE(15);//RECULER(45);
-      AVANCER(33);
-      //TOURNER_DROITE();
-      TOURNER_DE(-110);
-      RECALAGE(15);//RECULER(50);
-      AVANCER(20);
-      
-
+        RECALAGE(15);
+        AVANCER(20);
+        TOURNER_DE(110);
+        RECALAGE(15);
+        AVANCER(33);
+        TOURNER_DE(-110);
+        RECALAGE(15);
+        AVANCER(20);
       } 
     }
   }
