@@ -12,7 +12,7 @@
 
 //CONFIGURATION DU ROBOT
 //pour mettre en mode autonome (cad sans télécommande) true (vrai) ou false (faux)
-#define AUTONOME true
+#define AUTONOME false
 //pour debuguer le programme, mettre à true
 #define DEBUG false
 //à décommenter pour utiliser le bandeau de LEDS
@@ -488,7 +488,7 @@ void loop() {
   {
     while (liaisonSerie.available())
     {
-      delay(10);
+      //delay(10);
       char b = liaisonSerie.read();
      
       if(b==MESSAGE_JAUNE)
