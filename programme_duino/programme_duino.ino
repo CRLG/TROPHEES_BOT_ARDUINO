@@ -21,7 +21,7 @@
 //#define UTILISE_CAMERA true
 
 
-//ports utilisés
+//CONFIGURATION DES PORTS UTILISES SUR L'ARDUINO MEGA
 /**
  * POUR INFO en utilisant le motor shield v2:
  * la masse (GND) ainsi que le 5v (par defaut) ou le 3.3v sont nécessaire pour faire fonctionner le shield. (le 5v ou le 3v peuvent être choisis par un jumper sur la carte)
@@ -36,26 +36,76 @@
  * Si vous n'utilisez pas ces broches, les pinoches 9 et 10 sont libres d'utilisation.
  * Vous pouvez utiliser toutes les autres pinoches non mentionnées ci-dessus.
  */
-#define PIN_COULEUR_EQUIPE  A0 //mode autonome
-#define PIN_CONTACTEUR_AR_D A1
-#define PIN_CONTACTEUR_AR_G A2
-//pas encore utilisé        A3
-//motor shield SDA          A4
-//motor shield SCL          A5
-//pas encore utilisé        0
-//pas encore utilisé        1
-//pas encore utilisé        2
-#define PIN_RX              3 //mode téléguidé
-#define PIN_TX              4 //mode téléguidé
-#define PIN_TIRETTE         5 //mode autonome
-#define PIN_LEDS            6 //mode autonome
-#define PIN_SERVO_01        7
-#define PIN_SERVO_02        8
-#define PIN_SERVO_03        9
-#define PIN_SERVO_04        10
-#define PIN_SERVO_05        11
-#define PIN_SERVO_06        12
-//pas encore utilisé        13
+#define PIN_COULEUR_EQUIPE  A0 //bouton de choix de couleur d'équipe pour le mode autonome
+#define PIN_CONTACTEUR_AR_D A1 //contacteurs arrière droit pour le recalage
+#define PIN_CONTACTEUR_AR_G A2 //contacteurs arrière gauche pour le recalage
+#define PIN_A3              A3 //pas encore utilisé
+#define PIN_A4              A4 //pas encore utilisé
+#define PIN_A5              A5 //pas encore utilisé
+#define PIN_A6              A6 //pas encore utilisé
+#define PIN_A7              A7 //pas encore utilisé
+#define PIN_A8              A8 //pas encore utilisé
+#define PIN_A9              A9 //pas encore utilisé
+#define PIN_A10             A10 //pas encore utilisé
+#define PIN_A11             A11 //pas encore utilisé
+#define PIN_A12             A12 //pas encore utilisé
+#define PIN_A13             A13 //pas encore utilisé
+#define PIN_A14             A14 //pas encore utilisé
+#define PIN_A15             A15 //pas encore utilisé
+#define PIN_00              0 //pas encore utilisé
+#define PIN_02              1 //pas encore utilisé
+#define PIN_03              2 //PWM - pas encore utilisé
+#define PIN_TIRETTE         3 //capteur optique de la tirette pour le mode autonome
+#define PIN_LEDS            4 //fil de communication avec le bandeau de leds
+#define PIN_SERVO_01        5
+#define PIN_SERVO_02        6
+#define PIN_SERVO_03        7
+#define PIN_SERVO_04        8
+#define PIN_SERVO_05        9
+#define PIN_RX              10 //voie de réception de la télécommande pour le mode téléguidé
+#define PIN_TX              11 //voie d'envoi de la télécommande pour le mode téléguidé
+#define PIN_PWM_GAUCHE      12 //PWM - commande puissance moteur gauche (orange)
+#define PIN_PWM_DROIT       13 //PWM - commande puissance moteur droit (gris)
+#define PIN_14              14 //pas encore utilisé
+#define PIN_15              15 //pas encore utilisé
+#define PIN_16              16 //pas encore utilisé
+#define PIN_17              17 //pas encore utilisé
+#define PIN_18              18 //pas encore utilisé
+#define PIN_19              19 //pas encore utilisé
+#define PIN_SDA             20 //ATTENTION utilisé par le motor shield
+#define PIN_SCL             21 //ATTENTION utilisé par le motor shield
+#define PIN_22              22 //pas encore utilisé
+#define PIN_23              23 //pas encore utilisé
+#define PIN_24              24 //pas encore utilisé
+#define PIN_25              25 //pas encore utilisé
+#define PIN_26              26 //pas encore utilisé
+#define PIN_27              27 //pas encore utilisé
+#define PIN_28              28 //pas encore utilisé
+#define PIN_29              29 //pas encore utilisé
+#define PIN_30              30 //pas encore utilisé
+#define PIN_31              31 //pas encore utilisé
+#define PIN_32              32 //pas encore utilisé
+#define PIN_33              33 //pas encore utilisé
+#define PIN_34              34 //pas encore utilisé
+#define PIN_35              35 //pas encore utilisé
+#define PIN_36              36 //pas encore utilisé
+#define PIN_37              37 //pas encore utilisé
+#define PIN_38              38 //pas encore utilisé
+#define PIN_39              39 //pas encore utilisé
+#define PIN_40              40 //pas encore utilisé
+#define PIN_41              41 //pas encore utilisé
+#define PIN_42              42 //pas encore utilisé
+#define PIN_43              43 //pas encore utilisé
+#define PIN_44              44 //PWM - pas encore utilisé
+#define PIN_45              45 //PWM - pas encore utilisé
+#define PIN_46              46 //PWM - pas encore utilisé
+#define PIN_47              47 //pas encore utilisé
+#define PIN_48              48 //pas encore utilisé
+#define PIN_49              49 //pas encore utilisé
+#define PIN_CMD_1_GAUCHE    50 //commande n°1 moteur gauche (jaune)
+#define PIN_CMD_1_DROIT     51 //commande n°1 moteur droit (violet)
+#define PIN_CMD_2_GAUCHE    52 //commande n°2 moteur gauche (vert)
+#define PIN_CMD_2_DROIT     53 //commande n°2 moteur droit (bleu)
 
 //parametrage du match
 #define DUREE_MATCH               100000 //en millisecondes
@@ -63,10 +113,17 @@
 #define EQUIPE_JAUNE              0
 #define EQUIPE_BLEUE              1
 
-//parametrage optionnel
-#define LENTE                     2000
-#define RAPIDE                    4000
-#define NBRE_DE_LEDS              3 //nombre de led
+//parametrage divers
+#define MOTEUR_GAUCHE             2 //identifiant moteur gauche
+#define MOTEUR_DROIT              1 //identifiant moteur droit
+#define AVANT                     1 //sens des moteurs des roues
+#define ARRIERE                   -1 //sens des moteurs des roues
+#define STOP                      0 //sens des moteurs des roues
+#define VITESSE_PAP_LENTE         120 //vitesse des moteurs pas à pas
+#define VITESSE_PAP_RAPIDE        120 //vitesse des moteurs pas à pas
+#define NBRE_DE_LEDS              3 //nombre de leds
+#define LEDS_BLEU                 1 //couleur bleue pour les leds
+#define LEDS_ORANGE               2 //couleur orange pour les leds
 
 //valeurs des servo_moteurs
 #define SERVO_01_INIT 50
@@ -79,18 +136,17 @@
 #define SERVO_04_TEST 90
 #define SERVO_05_INIT 50
 #define SERVO_05_TEST 90
-#define SERVO_06_INIT 50
-#define SERVO_06_TEST 90
 
 //----------------------------------------------------------------------------------------------
-// CREATION VARIABLE, MOTEUR, CAMERA, LEDS
+// DECLARATION VARIABLES: MOTEUR, CAMERA, LEDS,...
 //----------------------------------------------------------------------------------------------
-//on informe le microcontrôleur que l'on utilise ses broches RX et TX pour une connexion série
+//on informe l'arduino que l'on utilise ses broches PIN_RX et PIN_TX pour une connexion série pour la télécommande
 SoftwareSerial liaisonSerie(PIN_RX, PIN_TX);
 
 //Création variables globales
-bool bProgrammeDemarre; // variable qui indique si le programme est demarre (demarre==true)
+bool bProgrammeDemarre; // variable qui indique si le programme est demarre (demarre==true), utilisé par la tirette
 int couleur_equipe;
+char etatTelecommande; //dernier état reçu de la télécommande (pour éviter de traiter toujours le même ordre)
 
 //Création des servos
 Servo servo_01;
@@ -98,26 +154,151 @@ Servo servo_02;
 Servo servo_03;
 Servo servo_04;
 Servo servo_05;
-Servo servo_06;
 
-//Création des 2 moteurs
+//Création des 2 moteurs pas à pas
 // Création d'une carte moteur avec l'adresse I2C par défaut
 Adafruit_MotorShield Carte_Moteur = Adafruit_MotorShield();
-// Connection d'un moteur de 200 pas par tour (1.8 degrés)
-// moteur_G #1 (M1 and M2)
-// moteur_D #2 (M3 and M4)
-Adafruit_StepperMotor *Moteur_G = Carte_Moteur.getStepper(200, 1);
-Adafruit_StepperMotor *Moteur_D = Carte_Moteur.getStepper(200, 2);
+// Connection de 2 moteurs pas à pas de 200 pas par tour (1.8 degrés)
+Adafruit_StepperMotor *Moteur_G = Carte_Moteur.getStepper(200, 1);// moteur_G (M1 et M2 connectés sur le shield)
+Adafruit_StepperMotor *Moteur_D = Carte_Moteur.getStepper(200, 2);// moteur_D (M3 et M4 connectés sur le shield)
 
 //création des leds
 #ifdef UTILISE_LEDS
   Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NBRE_DE_LEDS, PIN_LEDS, NEO_GRB + NEO_KHZ800);
-  int delayval = 500; // delais pour les leds
+#endif
 
-  //couleurs possibles de leds
-  #define LEDS_BLEU 1
-  #define LEDS_ORANGE
+//création caméra
+#ifdef UTILISE_CAMERA
+  Pixy2 pixy;
+#endif
 
+
+//----------------------------------------------------------------------------------------------
+// DEFINITION FONCTIONS: TOURNER_N_TOURS, RECULER,...
+//----------------------------------------------------------------------------------------------
+
+/**
+ * FONCTION ACTION_MOTEUR
+ * contrôle les moteurs des roues
+ * Nécessite 3 valeurs: le moteur choisi "moteur", le sens de rotation "sens" et la puissance choisie entre 0% et 100% "pourcentage"
+ * Rappel des commandes pour un pont H
+ * _______________________________________________________________
+ * pin1Moteur | pin2Moteur  | Comportement du moteur              |
+ * _______________________________________________________________
+ * HIGH       | LOW         | Le moteur tourne dans un sens       |
+ * _______________________________________________________________
+ * LOW        | HIGH        | Le moteur tourne dans l'autre sens  |
+ * _______________________________________________________________
+ * LOW        | LOW         | Frein électromagnétique             |
+ * _______________________________________________________________
+ * HIGH       | HIGH        | Frein électromagnétique             |
+ * _______________________________________________________________
+ */
+void ACTION_MOTEUR(int moteur,int sens,int pourcentage){
+  int pin1,etat1,pin2,etat2,pinPWM,puissance; //variable de la fonction
+  //test numéro du moteur
+  if (moteur==MOTEUR_DROIT)
+  {
+    pin1=PIN_CMD_1_DROIT;
+    pin2=PIN_CMD_2_DROIT;
+    pinPWM=PIN_PWM_DROIT;
+  }
+  if (moteur==MOTEUR_GAUCHE)
+  {
+    pin1=PIN_CMD_1_GAUCHE;
+    pin2=PIN_CMD_2_GAUCHE;
+    pinPWM=PIN_PWM_GAUCHE;
+  }
+  //test sens du moteur AVANT/ARRIERE/STOP
+  if (sens==AVANT){
+    etat1=1;
+    etat2=0;
+  }
+  if (sens==ARRIERE){
+    etat1=0;
+    etat2=1;
+  }
+  if (sens==STOP) {
+    etat1=0;
+    etat2=0;
+  }
+  //on transforme la valeur de puissance en % en valeur comprise entre 0 et 255 pour que ce soit compréhensible par l'arduino
+  puissance=map(pourcentage,0,100,0,255);
+  //on passe les commandes à l'arduino
+  analogWrite(pinPWM,puissance);
+  digitalWrite(pin1,etat1);
+  digitalWrite(pin2,etat2);
+  //affichage sur le moniteur série si le débugage est activé
+  if(DEBUG)
+  {
+    if (moteur==MOTEUR_DROIT) Serial.print("Moteur : droit");
+    if (moteur==MOTEUR_GAUCHE) Serial.print("Moteur : gauche");
+    if (sens==AVANT) Serial.print(" \tsens : avant");
+    if (sens==ARRIERE) Serial.print(" \tsens : arrière");
+    if (sens==STOP) Serial.print("\t! stop ! ");
+    Serial.print("\tpourcentage : ");
+    Serial.print(pourcentage);
+    Serial.print("\tpuissance : ");
+    Serial.println(puissance);
+  }
+}
+
+/*
+ * FONCTION AVANCER
+ * fait avancer le robot
+ * demande une valeur : la puissance moteur entre 0 et 100%
+ */
+void AVANCER(int puissance)
+{
+    ACTION_MOTEUR(MOTEUR_GAUCHE,AVANT,puissance);  
+    ACTION_MOTEUR(MOTEUR_DROIT,AVANT,puissance); 
+}
+
+/*
+ * FONCTION RECULER
+ * fait reculer le robot
+ * demande une valeur : la puissance moteur entre 0 et 100%
+ */
+void RECULER(int puissance)
+{
+    ACTION_MOTEUR(MOTEUR_GAUCHE,ARRIERE,puissance);  
+    ACTION_MOTEUR(MOTEUR_DROIT,ARRIERE,puissance); 
+}
+
+/*
+ * FONCTION STOPPER
+ * fait s'arrêter le robot
+ * demande aucune valeur
+ */
+void STOPPER()
+{
+    ACTION_MOTEUR(MOTEUR_GAUCHE,STOP,0);  
+    ACTION_MOTEUR(MOTEUR_DROIT,STOP,0); 
+}
+
+/*
+ * FONCTION TOURNER_GAUCHE
+ * fait tourner vers la gauche le robot
+ * demande une valeur : la puissance moteur entre 0 et 100%
+ */
+void TOURNER_GAUCHE(int puissance)
+{
+    ACTION_MOTEUR(MOTEUR_GAUCHE,ARRIERE,puissance);  
+    ACTION_MOTEUR(MOTEUR_DROIT,AVANT,puissance); 
+}
+
+/*
+ * FONCTION TOURNER_DROITE
+ * fait tourner vers la droite le robot
+ * demande une valeur : la puissance moteur entre 0 et 100%
+ */
+void TOURNER_DROITE(int puissance)
+{
+    ACTION_MOTEUR(MOTEUR_GAUCHE,AVANT,puissance);  
+    ACTION_MOTEUR(MOTEUR_DROIT,ARRIERE,puissance); 
+}
+
+#ifdef UTILISE_LEDS
   /*
    * FONCTION METTRE_LEDS_A
    * mets toutes les leds à une certaine couleur
@@ -133,74 +314,64 @@ Adafruit_StepperMotor *Moteur_D = Carte_Moteur.getStepper(200, 2);
           default:    pixels.setPixelColor(i, pixels.Color(75,0,75)); break; // réglage en bleu par defaut
         }
         pixels.show(); //ça applique la couleur programmée
-        delay(delayval); //on attend "delayval" milliseconds
+        delay(500); //on attend 500 millisecondes
       }
   }
 #endif
-
-//création caméra
-#ifdef UTILISE_CAMERA
-  Pixy2 pixy;
-#endif
-
 /*
- * FONCTION VITESSE
- * positionne la vitesse des moteurs
+ * FONCTION VITESSE_MOTEURS_PAS_A_PAS
+ * positionne la vitesse des moteurs pas à pas gauche et droite
  * Demande une valeur qui est la vitesse de rotation en tours par minute
  */
-void VITESSE(int valeur_vitesse)
+void VITESSE_MOTEURS_PAS_A_PAS(int valeur_vitesse)
 {
     Moteur_G->setSpeed(valeur_vitesse);   
     Moteur_D->setSpeed(valeur_vitesse); 
 }
 
 /*
- * FONCTION AVANCER
- * Fait avancer le robot d'une certaine distance.
- * Demande une valeur qui est la distance à faire en cm
+ * FONCTION TOURNER_N_TOURS
+ * Fait tourner de plusieurs tours les moteurs pas à pas.
+ * Demande deux valeurs qui sont le nombre de tours à faire et le sens de rotation
  */
-void AVANCER(float x)
+void TOURNER_N_TOURS(float n, int sens)
 {
-  int pas = x/DISTANCE_PAR_PAS_MOTEUR;
-  for(int i=0;i<pas;i++)
+  int pas = n*200;
+  if(sens==AVANT)
   {
-    Moteur_G->step(1,BACKWARD,SINGLE); //en avant
-    Moteur_D->step(1,FORWARD,SINGLE); //en avant
+    for(int i=0;i<pas;i++)
+    {
+      Moteur_G->step(1,BACKWARD,SINGLE); //en avant
+      Moteur_D->step(1,FORWARD,SINGLE); //en avant
+    }
+  }
+  if(sens==ARRIERE)
+  {
+    for(int i=0;i<pas;i++)
+    {
+      Moteur_G->step(1,FORWARD,SINGLE); //en arriere
+      Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
+    }
   }
 }
 
 /*
- * FONCTION AVANCER_UN_PAS
- * Fait touner le moteur droit et gauche d'un pas 
+ * FONCTION TOURNER_UN_PAS
+ * Fait touner le moteur pas à pas droit et gauche d'un pas
+ * Demande le sens de rotation du moteur
  */
-void AVANCER_UN_PAS()
+void TOURNER_UN_PAS(int sens)
 {
-    Moteur_G->step(1,BACKWARD,SINGLE); //en avant
-    Moteur_D->step(1,FORWARD,SINGLE); //en avant
-}
-
-/*
- * FONCTION RECULER
- * Fait reculer le robot d'une certaine distance.
- * Demande une valeur qui est la distance à faire en cm
- */
-void RECULER(float x)
-{ 
-  int pas = x/DISTANCE_PAR_PAS_MOTEUR;
-  for(int i=0;i<pas;i++)
-  {
-    Moteur_G->step(1,FORWARD,SINGLE); //en arriere
-    Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
-  }
-}
-
-/*
- * FONCTION RECULER_UN_PAS
- * Fait touner le moteur droit et gauche d'un pas 
- */
-void RECULER_UN_PAS(){ 
-    Moteur_G->step(1,FORWARD,SINGLE); //en arriere
-    Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
+    if(sens==AVANT)
+    {
+      Moteur_G->step(1,BACKWARD,SINGLE); //en avant
+      Moteur_D->step(1,FORWARD,SINGLE); //en avant
+    }
+    if(sens==ARRIERE)
+    {
+      Moteur_G->step(1,FORWARD,SINGLE); //en arriere
+      Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
+    }
 }
 
 /*
@@ -232,56 +403,6 @@ void RECALAGE(int time_out){
   while(tempo<500);
 } 
 
-
-/*
- * FONCTION TOURNER_DROITE
- * Fait tourner le robot vers la droite
- */
-void TOURNER_DROITE(void){
-  for(int i=0;i<100;i++)
-  {
-    Moteur_G->step(1,BACKWARD,SINGLE); //en avant
-    Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
-  }
-}
-
-/*
- * FONCTION TOURNER_GAUCHE
- * Fait tourner le robot vers la gauche
- */
-void TOURNER_GAUCHE(void){
-  for(int i=0;i<100;i++)
-  {
-    Moteur_G->step(1,FORWARD,SINGLE); //en arriere
-    Moteur_D->step(1,FORWARD,SINGLE); //en avant
-  }
-}
-
-/*
- * FONCTION TOURNER_DE
- * Fait tourner le robot de plusieurs pas moteur vers la gauche ou la droite
- * La fonction appelle une variable qui est le nombre de pas pour tourner
- * si le nombre est négatif c'est vers la gauche sinon vers la droite
- */
-void TOURNER_DE(int pas){
-  if(pas>0)
-  {
-    for(int i=0;i<pas;i++)
-    {
-      Moteur_G->step(1,BACKWARD,SINGLE); //en avant
-      Moteur_D->step(1,BACKWARD,SINGLE); //en arriere
-    }
-  }
-  if(pas<0)
-  {
-    for(int i=0;i<(pas*(-1));i++)
-    {
-      Moteur_G->step(1,FORWARD,SINGLE); //en arriere
-      Moteur_D->step(1,FORWARD,SINGLE); //en avant
-    }
-  }
-}
-
 /*
  * FONCTION InterruptTimer2
  * fonction appelée au bout de 100 secondes, fin du
@@ -299,14 +420,14 @@ void FinDeMatch()
     {
       pixels.setPixelColor(i, pixels.Color(0,150,0)); //leds en vert
       pixels.show(); //ça applique la couleur programmée
-      delay(delayval); //on attend pendant "delayval" millisecondes avant d'allumer la prochaine led
+      delay(500); //on attend 500 millisecondes avant d'allumer la prochaine led
     }
     for(int i=0;i<NUMPIXELS;i++)
     {
       pixels.setPixelColor(i, pixels.Color(0,0,0)); //on éteint toutes les leds
     }
     pixels.show(); //ça applique la couleur programmée
-    delay(delayval); //on attend pendant "delayval" millisecondes avant de recommencer le chenillard
+    delay(500); //on attend 500 millisecondes avant de recommencer le chenillard
 #endif
   }
 }
@@ -356,6 +477,7 @@ void setup()
   if(DEBUG)
   {
     Serial.begin(9600);
+    Serial.println("Debug activé\n\n");
   }
 
 #ifdef UTILISE_CAMERA
@@ -365,19 +487,24 @@ void setup()
 
 #ifdef UTILISE_LEDS
   //initialisation du bandeau de leds
-  //pixels.begin(); //Pour utiliser les leds
+  pixels.begin(); //Pour utiliser les leds
 #endif
+
+  //on utilise les pinoches réservées aux moteurs des roues
+  pinMode(PIN_PWM_GAUCHE,OUTPUT); //commande puissance moteur gauche
+  pinMode(PIN_PWM_DROIT,OUTPUT); //commande puissance moteur droit
+  pinMode(PIN_CMD_1_GAUCHE,OUTPUT); //commande n°1 moteur gauche
+  pinMode(PIN_CMD_1_DROIT,OUTPUT); //commande n°1 moteur droit
+  pinMode(PIN_CMD_2_GAUCHE,OUTPUT); //commande n°2 moteur gauche
+  pinMode(PIN_CMD_2_DROIT,OUTPUT); //commande n°2 moteur droit
   
-  //initialisation de la carte moteur
+  //initialisation de la carte moteur pour utiliser les moteurs pas à pas
   Carte_Moteur.begin();  //initialise le moteur avec une frequence par défaut 1.6KHz
 
   //initialisation des vitesses des moteurs selon le mode (AUTONOME ou TELEGUIDE)
   if (AUTONOME)
   {
-    //vitesse max
-    Moteur_G->setSpeed(4000);   
-    Moteur_D->setSpeed(4000); 
-    // initialisation du chronométrage du match
+    //initialisation du chronométrage du match
     MsTimer2::set(DUREE_MATCH, FinDeMatch); // période = duree du match, on activera avec la tirette
     //initialisation de la tirette      
     pinMode(PIN_TIRETTE, INPUT);  //en entrée
@@ -388,12 +515,12 @@ void setup()
   else
   {
     //on ouvre la communication série de la télécommande
-    liaisonSerie.begin(9600);
-    //vitesse obligatoire pour eviter blocage pc
-    Moteur_G->setSpeed(2000);    
-    Moteur_D->setSpeed(2000);      
+    liaisonSerie.begin(9600); 
+    etatTelecommande=MESSAGE_STOP;
   }
-  
+
+  //quel que soit le cas de figure les roues sont arretées au début
+  STOPPER();
   
   pinMode(LED_BUILTIN, OUTPUT); // initialisation de la led interne de l'arduino
   digitalWrite(LED_BUILTIN, LOW);    // led eteinte
@@ -434,13 +561,6 @@ void setup()
   servo_05.write(SERVO_05_TEST); 
   delay(1500);
   servo_05.write(SERVO_05_INIT); 
-  */
-
-  servo_06.attach(PIN_SERVO_06);
-  /*
-  servo_06.write(SERVO_06_TEST); 
-  delay(1500);
-  servo_06.write(SERVO_06_INIT); 
   */
 }
 
@@ -488,74 +608,80 @@ void loop() {
   {
     while (liaisonSerie.available())
     {
-      //delay(10);
-      char b = liaisonSerie.read();
+      char donneeRecue = liaisonSerie.read();
      
-      if(b==MESSAGE_JAUNE)
+      if(donneeRecue==MESSAGE_JAUNE)
       {
         if(DEBUG) Serial.println("JAUNE");
       }
-      if(b==MESSAGE_VERT)
+      if(donneeRecue==MESSAGE_VERT)
       {
         if(DEBUG) Serial.println("VERT");
       }
-      if(b==MESSAGE_BLEU)
+      if(donneeRecue==MESSAGE_BLEU)
       {
         if(DEBUG) Serial.println("BLEU");
       }
-      if(b==MESSAGE_ROUGE)
+      if(donneeRecue==MESSAGE_ROUGE)
       {
         if(DEBUG) Serial.println("ROUGE");
       }
-      if(b==MESSAGE_CLICK)
+      if(donneeRecue==MESSAGE_CLICK)
       {
         if(DEBUG) Serial.println("CLICK");
       }
       //actions de joystick
-      if(b==MESSAGE_GAUCHE_RAPIDE)
+      if((donneeRecue==MESSAGE_STOP)&&(etatTelecommande!=MESSAGE_STOP))
+      {
+        if(DEBUG) Serial.println("STOP");
+        etatTelecommande=MESSAGE_STOP;
+        STOPPER();
+      }
+      if((donneeRecue==MESSAGE_GAUCHE_RAPIDE)&&(etatTelecommande!=MESSAGE_GAUCHE_RAPIDE))
       {
         if(DEBUG) Serial.println("GAUCHE");
-        VITESSE(RAPIDE);
-        TOURNER_DE(-1);
+        etatTelecommande=MESSAGE_GAUCHE_RAPIDE;
+        TOURNER_GAUCHE(50);
+        
       }
-      if(b==MESSAGE_GAUCHE_LENT)
+      if((donneeRecue==MESSAGE_GAUCHE_LENT)&&(etatTelecommande!=MESSAGE_GAUCHE_LENT))
       {
-        VITESSE(LENTE);
-        TOURNER_DE(-1);
+        etatTelecommande=MESSAGE_GAUCHE_LENT;
+        TOURNER_GAUCHE(20);
       }
-      if(b==MESSAGE_DROITE_LENT)
+      if((donneeRecue==MESSAGE_DROITE_LENT)&&(etatTelecommande!=MESSAGE_DROITE_LENT))
       {
-        VITESSE(LENTE);
-        TOURNER_DE(1);  
+        etatTelecommande=MESSAGE_DROITE_LENT;
+        TOURNER_DROITE(20);
       }
-      if(b==MESSAGE_DROITE_RAPIDE)
+      if((donneeRecue==MESSAGE_DROITE_RAPIDE)&&(etatTelecommande!=MESSAGE_DROITE_RAPIDE))
       {
         if(DEBUG) Serial.println("DROITE");
-        VITESSE(RAPIDE);
-        TOURNER_DE(1);
+        etatTelecommande=MESSAGE_DROITE_RAPIDE;
+        TOURNER_DROITE(50);
       }
 
-      if(b==MESSAGE_ARRIERE_RAPIDE)
+      if((donneeRecue==MESSAGE_ARRIERE_RAPIDE)&&(etatTelecommande!=MESSAGE_ARRIERE_RAPIDE))
       {
         if(DEBUG) Serial.println("ARRIERE");
-        VITESSE(RAPIDE);
-        RECULER_UN_PAS();
+        etatTelecommande=MESSAGE_ARRIERE_RAPIDE;
+        RECULER(50);
       }
-      if(b==MESSAGE_ARRIERE_LENT)
+      if((donneeRecue==MESSAGE_ARRIERE_LENT)&&(etatTelecommande!=MESSAGE_ARRIERE_LENT))
       {
-        VITESSE(LENTE);
-        RECULER_UN_PAS();
+        etatTelecommande=MESSAGE_ARRIERE_LENT;
+        RECULER(20);
       }
-      if(b==MESSAGE_AVANT_LENT)
+      if((donneeRecue==MESSAGE_AVANT_LENT)&&(etatTelecommande!=MESSAGE_AVANT_LENT))
       {
-        VITESSE(LENTE);
-        AVANCER_UN_PAS();  
+        etatTelecommande=MESSAGE_AVANT_LENT;
+        AVANCER(20);
       }
-      if(b==MESSAGE_AVANT_RAPIDE)
+      if((donneeRecue==MESSAGE_AVANT_RAPIDE)&&(etatTelecommande!=MESSAGE_AVANT_RAPIDE))
       {
         if(DEBUG) Serial.println("AVANT");
-        VITESSE(RAPIDE);
-        AVANCER_UN_PAS();
+        etatTelecommande=MESSAGE_AVANT_RAPIDE;
+        AVANCER(50);
       }
     } 
   }
@@ -606,25 +732,11 @@ void loop() {
       //selon la couleur de l'équipe on déroule un programme
       if (couleur_equipe==EQUIPE_BLEUE)
       {
-        RECALAGE(15);
-        AVANCER(20);
-        TOURNER_DROITE();
-        RECALAGE(15);
-        AVANCER(27);
-        TOURNER_DE(120);
-        RECALAGE(15);
-        AVANCER(20);          
+                  
       }
       else
       {
-        RECALAGE(15);
-        AVANCER(20);
-        TOURNER_DE(110);
-        RECALAGE(15);
-        AVANCER(33);
-        TOURNER_DE(-110);
-        RECALAGE(15);
-        AVANCER(20);
+        
       } 
     }
   }

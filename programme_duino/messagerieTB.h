@@ -12,3 +12,4 @@
 #define MESSAGE_GAUCHE_RAPIDE 'k'
 #define MESSAGE_DROITE_LENT 'l'
 #define MESSAGE_DROITE_RAPIDE 'm'
+#define MESSAGE_STOP 'n'
