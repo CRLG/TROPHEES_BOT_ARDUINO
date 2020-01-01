@@ -1,4 +1,3 @@
-#include <SoftwareSerial.h>
 #include "messagerieTB.h"
 #include <Wire.h>
 #include <Pixy2.h>
@@ -52,30 +51,30 @@
 #define PIN_A13             A13 //pas encore utilisé
 #define PIN_A14             A14 //pas encore utilisé
 #define PIN_A15             A15 //pas encore utilisé
-#define PIN_00              0 //pas encore utilisé
-#define PIN_02              1 //pas encore utilisé
-#define PIN_03              2 //PWM - pas encore utilisé
-#define PIN_TIRETTE         3 //capteur optique de la tirette pour le mode autonome
-#define PIN_LEDS            4 //fil de communication avec le bandeau de leds
-#define PIN_SERVO_01        5
-#define PIN_SERVO_02        6
-#define PIN_SERVO_03        7
-#define PIN_SERVO_04        8
-#define PIN_SERVO_05        9
-#define PIN_RX              10 //voie de réception de la télécommande pour le mode téléguidé
-#define PIN_TX              11 //voie d'envoi de la télécommande pour le mode téléguidé
+//#define PIN_00              0 //utilisé en cas de débugage
+//#define PIN_01              1 //utilisé en cas de débugage
+//#define PIN_02              2 //pas encore utilisé mais peut perturber le chrono pour la fin de match
+#define PIN_SERVO_01        3 //PWM - Servo pince gauche
+#define PIN_SERVO_02        4 //PWM - pas encore utilisé
+#define PIN_SERVO_03        5 //PWM - pas encore utilisé
+#define PIN_SERVO_04        6 //PWM - pas encore utilisé
+#define PIN_SERVO_05        7 //PWM - pas encore utilisé
+#define PIN_SERVO_06        8 //PWM - pas encore utilisé
+#define PIN_SERVO_07        9 //PWM - pas encore utilisé - servo 2 sur le shield motor
+#define PIN_SERVO_08        10 //PWM - Servo pince droite - servo 1 sur le shield motor
+#define PIN_SERVO_09        11 //PWM - pas encore utilisé
 #define PIN_PWM_GAUCHE      12 //PWM - commande puissance moteur gauche (orange)
 #define PIN_PWM_DROIT       13 //PWM - commande puissance moteur droit (gris)
 #define PIN_14              14 //pas encore utilisé
 #define PIN_15              15 //pas encore utilisé
-#define PIN_16              16 //pas encore utilisé
-#define PIN_17              17 //pas encore utilisé
-#define PIN_18              18 //pas encore utilisé
-#define PIN_19              19 //pas encore utilisé
-#define PIN_SDA             20 //ATTENTION utilisé par le motor shield
-#define PIN_SCL             21 //ATTENTION utilisé par le motor shield
-#define PIN_22              22 //pas encore utilisé
-#define PIN_23              23 //pas encore utilisé
+//#define PIN_RX              18 //ATTENTION utilisé par RX voie de réception de la télécommande pour le mode téléguidé
+//#define PIN_TX              19 //ATTENTION utilisé par TX voie d'envoi de la télécommande pour le mode téléguidé
+#define PIN_18              16 //pas encore utilisé
+#define PIN_19              17 //pas encore utilisé
+//#define PIN_SDA             20 //ATTENTION utilisé par le motor shield
+//#define PIN_SCL             21 //ATTENTION utilisé par le motor shield
+#define PIN_TIRETTE         22 //capteur optique de la tirette pour le mode autonome
+#define PIN_LEDS            23 //fil de communication avec le bandeau de leds
 #define PIN_24              24 //pas encore utilisé
 #define PIN_25              25 //pas encore utilisé
 #define PIN_26              26 //pas encore utilisé
@@ -86,10 +85,10 @@
 #define PIN_31              31 //pas encore utilisé
 #define PIN_32              32 //pas encore utilisé
 #define PIN_33              33 //pas encore utilisé
-#define PIN_34              34 //pas encore utilisé
-#define PIN_35              35 //pas encore utilisé
-#define PIN_36              36 //pas encore utilisé
-#define PIN_37              37 //pas encore utilisé
+#define PIN_CMD_1_GAUCHE    34 //commande n°1 moteur gauche (jaune)
+#define PIN_CMD_1_DROIT     35 //commande n°1 moteur droit (violet)
+#define PIN_CMD_2_GAUCHE    36 //commande n°2 moteur gauche (vert)
+#define PIN_CMD_2_DROIT     37 //commande n°2 moteur droit (bleu)
 #define PIN_38              38 //pas encore utilisé
 #define PIN_39              39 //pas encore utilisé
 #define PIN_40              40 //pas encore utilisé
@@ -102,10 +101,10 @@
 #define PIN_47              47 //pas encore utilisé
 #define PIN_48              48 //pas encore utilisé
 #define PIN_49              49 //pas encore utilisé
-#define PIN_CMD_1_GAUCHE    50 //commande n°1 moteur gauche (jaune)
-#define PIN_CMD_1_DROIT     51 //commande n°1 moteur droit (violet)
-#define PIN_CMD_2_GAUCHE    52 //commande n°2 moteur gauche (vert)
-#define PIN_CMD_2_DROIT     53 //commande n°2 moteur droit (bleu)
+#define PIN_50              50 //pas encore utilisé
+#define PIN_51              51 //pas encore utilisé
+#define PIN_52              52 //pas encore utilisé
+#define PIN_53              53 //pas encore utilisé
 
 //parametrage du match
 #define DUREE_MATCH               100000 //en millisecondes
@@ -126,10 +125,10 @@
 #define LEDS_ORANGE               2 //couleur orange pour les leds
 
 //valeurs des servo_moteurs
-#define SERVO_01_INIT 50
-#define SERVO_01_TEST 90
-#define SERVO_02_INIT 50
-#define SERVO_02_TEST 90
+#define P_GAUCHE_FERME 65
+#define P_GAUCHE_OUVERT 170
+#define P_DROITE_FERME 100
+#define P_DROITE_OUVERT 0
 #define SERVO_03_INIT 50
 #define SERVO_03_TEST 90
 #define SERVO_04_INIT 50
@@ -140,20 +139,23 @@
 //----------------------------------------------------------------------------------------------
 // DECLARATION VARIABLES: MOTEUR, CAMERA, LEDS,...
 //----------------------------------------------------------------------------------------------
-//on informe l'arduino que l'on utilise ses broches PIN_RX et PIN_TX pour une connexion série pour la télécommande
-SoftwareSerial liaisonSerie(PIN_RX, PIN_TX);
 
 //Création variables globales
 bool bProgrammeDemarre; // variable qui indique si le programme est demarre (demarre==true), utilisé par la tirette
 int couleur_equipe;
 char etatTelecommande; //dernier état reçu de la télécommande (pour éviter de traiter toujours le même ordre)
+bool pincesOuvertes;
 
 //Création des servos
-Servo servo_01;
-Servo servo_02;
+Servo servo_Pince_Gauche;
+Servo servo_Pince_Droite;
 Servo servo_03;
 Servo servo_04;
 Servo servo_05;
+Servo servo_06;
+Servo servo_07;
+Servo servo_08;
+Servo servo_09;
 
 //Création des 2 moteurs pas à pas
 // Création d'une carte moteur avec l'adresse I2C par défaut
@@ -515,7 +517,8 @@ void setup()
   else
   {
     //on ouvre la communication série de la télécommande
-    liaisonSerie.begin(9600); 
+    Serial2.begin(9600);    
+
     etatTelecommande=MESSAGE_STOP;
   }
 
@@ -527,21 +530,20 @@ void setup()
   
   pinMode(PIN_CONTACTEUR_AR_D,INPUT_PULLUP); // contacteur arrière droit
   pinMode(PIN_CONTACTEUR_AR_G,INPUT_PULLUP); // contacteur arrière gauche
-  
-  servo_01.attach(PIN_SERVO_01);
-  /*
-  servo_01.write(SERVO_01_TEST); 
-  delay(1500);
-  servo_01.write(SERVO_01_INIT); 
-  */
-  
-  servo_02.attach(PIN_SERVO_02);
-  /*
-  servo_02.write(SERVO_02_TEST); 
-  delay(1500);
-  servo_02.write(SERVO_02_INIT); 
-  */
 
+  //Initialisation des pinces
+  servo_Pince_Gauche.attach(PIN_SERVO_01);
+  servo_Pince_Gauche.write(P_GAUCHE_OUVERT); 
+  delay(1500);
+  servo_Pince_Gauche.write(P_GAUCHE_FERME);
+  
+  servo_Pince_Droite.attach(PIN_SERVO_08);
+  servo_Pince_Droite.write(P_DROITE_OUVERT); 
+  delay(1500);
+  servo_Pince_Droite.write(P_DROITE_FERME);
+  //état d'ouverture des pinces utilisé en mode téléguidé
+  pincesOuvertes=false;
+  
   servo_03.attach(PIN_SERVO_03);
   /*
   servo_03.write(SERVO_03_TEST); 
@@ -606,9 +608,10 @@ void loop() {
 // MODE TELEGUIDE
 //----------------------------------------------------------------------------------------------
   {
-    while (liaisonSerie.available())
+    //Serial.println("*");
+    while (Serial2.available())
     {
-      char donneeRecue = liaisonSerie.read();
+      char donneeRecue = Serial2.read();
      
       if(donneeRecue==MESSAGE_JAUNE)
       {
@@ -625,6 +628,19 @@ void loop() {
       if(donneeRecue==MESSAGE_ROUGE)
       {
         if(DEBUG) Serial.println("ROUGE");
+        if(pincesOuvertes)
+        {
+          servo_Pince_Gauche.write(P_GAUCHE_FERME);
+          servo_Pince_Droite.write(P_DROITE_FERME);
+          pincesOuvertes=false;
+        }
+        else
+        {
+          servo_Pince_Gauche.write(P_GAUCHE_OUVERT);
+          servo_Pince_Droite.write(P_DROITE_OUVERT);
+          pincesOuvertes=true;
+        }
+        
       }
       if(donneeRecue==MESSAGE_CLICK)
       {
