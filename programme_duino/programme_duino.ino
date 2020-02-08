@@ -37,7 +37,7 @@
  * Etant donné que le shield utilise l'i2c pour communiquer, vous pouvez connecter d'autres capteurs ou actionneurs i2c sur les signaux SDA et SCL tant qu'ils n'utilisent pas l'adresse 0x60
  * (l'adresse par défaut du shield) ou l'adresse 0x070 (l'adresse utilisable par le shield pour contrôler un groupe de shield)
  *
- * Si vous voulez utiliser les broches ddu shield déddiées aux servos, elles sont reliées aux pinoches 9 et 10.
+ * Si vous voulez utiliser les broches du shield déddiées aux servos, elles sont reliées aux pinoches 9 et 10.
  * Si vous n'utilisez pas ces broches, les pinoches 9 et 10 sont libres d'utilisation.
  * Vous pouvez utiliser toutes les autres pinoches non mentionnées ci-dessus.
  */
@@ -66,7 +66,7 @@
 #define PIN_SERVO_04        6 //PWM - pas encore utilisé
 #define PIN_SERVO_05        7 //PWM - pas encore utilisé
 #define PIN_SERVO_06        8 //PWM - pas encore utilisé
-#define PIN_SERVO_07        9 //PWM - pas encore utilisé - servo 2 sur le shield motor
+#define PIN_SERVO_07        9 //PWM - Servo pour les gobelets réservoir
 #define PIN_SERVO_08        10 //PWM - Servo pince droite - servo 1 sur le shield motor
 #define PIN_SERVO_09        11 //PWM - pas encore utilisé
 #define PIN_PWM_GAUCHE      12 //PWM - commande puissance moteur gauche (orange)
@@ -135,8 +135,9 @@
 #define P_GAUCHE_OUVERT 170
 #define P_DROITE_FERME 100
 #define P_DROITE_OUVERT 0
-#define SERVO_03_INIT 50
-#define SERVO_03_TEST 90
+#define GOBELETS_LEVE 40
+#define GOBELETS_MILIEU 100
+#define GOBELETS_RANGE 158
 #define SERVO_04_INIT 50
 #define SERVO_04_TEST 90
 #define SERVO_05_INIT 50
@@ -150,12 +151,13 @@
 bool bProgrammeDemarre; // variable qui indique si le programme est demarre (demarre==true), utilisé par la tirette
 int couleur_equipe;
 char etatTelecommande; //dernier état reçu de la télécommande (pour éviter de traiter toujours le même ordre)
+int gobelet_leve; //0 range, 1 milieu, 2 leve
 bool pincesOuvertes;
 
 //Création des servos
 Servo servo_Pince_Gauche;
 Servo servo_Pince_Droite;
-Servo servo_03;
+Servo servo_Gobelets;
 Servo servo_04;
 Servo servo_05;
 Servo servo_06;
@@ -513,13 +515,13 @@ void setup()
   servo_Pince_Droite.write(P_DROITE_FERME);
   //état d'ouverture des pinces utilisé en mode téléguidé
   pincesOuvertes=false;
+  //état d'ouverture de la prise des gobelets
+  gobelet_leve=0;
   
-  servo_03.attach(PIN_SERVO_03);
-  /*
-  servo_03.write(SERVO_03_TEST); 
+  servo_Gobelets.attach(PIN_SERVO_07);
+  servo_Gobelets.write(GOBELETS_LEVE); 
   delay(1500);
-  servo_03.write(SERVO_03_INIT); 
-  */
+  servo_Gobelets.write(GOBELETS_RANGE); 
 
   servo_04.attach(PIN_SERVO_04);
   /*
@@ -557,6 +559,34 @@ void loop() {
       if(donneeRecue==MESSAGE_VERT)
       {
         if(DEBUG) Serial.println("VERT");
+        switch(gobelet_leve)
+        {
+          case 0:
+          servo_Gobelets.write(GOBELETS_MILIEU);
+          gobelet_leve=1;
+          break;
+
+          case 1:
+          servo_Gobelets.write(GOBELETS_LEVE);
+          gobelet_leve=2;
+          break;
+
+          case 2:
+          servo_Gobelets.write(GOBELETS_MILIEU);
+          gobelet_leve=3;
+          break;
+
+          case 3:
+          servo_Gobelets.write(GOBELETS_RANGE);
+          gobelet_leve=0;
+          break;
+
+          default:
+          servo_Gobelets.write(GOBELETS_MILIEU);
+          gobelet_leve=3;
+          break;
+          
+        }
       }
       if(donneeRecue==MESSAGE_BLEU)
       {
